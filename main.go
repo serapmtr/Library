@@ -5,28 +5,6 @@ import (
 	"time"
 )
 
-// --Summary:
-//
-//	Create a program to manage lending of library books.
-//
-// --Requirements:
-// * The library must have books and members, and must include:
-//   - Which books have been checked out +
-//   - What time the books were checked out +
-//   - What time the books were returned +
-//
-// * Perform the following:
-//   - Add at least 4 books and at least 3 members to the library +
-//   - Check out a book +
-//   - Check in a book +
-//   - Print out initial library information, and after each change
-//
-// * There must only ever be one copy of the library in memory at any time
-//
-// --Notes:
-// * Use the `time` package from the standard library for check in/out times
-// * Liberal use of type aliases, structs, and maps will help organize this project
-
 type Book struct {
 	Name, Author string
 	Page         int
@@ -40,6 +18,7 @@ var Books map[int]*Book
 type Member struct {
 	Name string
 	Age  int
+	Book string
 }
 
 var Members map[int]*Member
@@ -121,51 +100,44 @@ func AddMembers() map[int]*Member {
 	return Members
 }
 
-func Enrolments(m Member, b Book) map[Member]Book {
-	enrolment := make(map[Member]Book)
+func PrintAllBooks(books map[int]*Book, i int) {
 
-	if !b.IsIn {
-		fmt.Println("INSIDE ISIN")
-		b.IsIn = true
-		b.InDate = time.Now()
-		delete(enrolment, m)
-		fmt.Println("You can't get this book")
-		fmt.Println(enrolment)
-		return enrolment
-	}
-	if b.IsIn {
-		fmt.Println("INSIDE ISOUT")
-		b.OutDate = time.Now()
-		b.IsIn = false
-		enrolment[m] = b
+	fmt.Println("Name: ", books[i].Name)
+	fmt.Println("Author: ", books[i].Author)
+	fmt.Println("Page: ", books[i].Page)
+	fmt.Println("In: ", books[i].InDate.Format("2006-01-02 15:04:05"))
+	fmt.Println("Out: ", books[i].OutDate.Format("2006-01-02 15:04:05"))
+	fmt.Println("In: ", books[i].IsIn)
+	fmt.Println()
 
-		return enrolment
-	}
-	return enrolment
+}
+
+func PrintAllMembers(members map[int]*Member, i int) {
+
+	fmt.Println("Name: ", members[i].Name)
+	fmt.Println("Age: ", members[i].Age)
+	fmt.Println()
 
 }
 
 func main() {
+
+	in := make(map[int]*Book)
+	out := make(map[int]*Book)
 	books := AddBooks()
 
 	members := AddMembers()
 
 	fmt.Println("BOOKS:")
-	for i := 0; i < len(books); i++ {
-		fmt.Println("Name: ", books[i].Name)
-		fmt.Println("Author: ", books[i].Author)
-		fmt.Println("Page: ", books[i].Page)
-		fmt.Println("In: ", books[i].InDate)
-		fmt.Println("Out: ", books[i].OutDate)
-		fmt.Println("In: ", books[i].IsIn)
-		fmt.Println()
+	fmt.Println("************")
+	for i := 0; i < 5; i++ {
+		PrintAllBooks(books, i)
 	}
 
 	fmt.Println("MEMBERS:")
-	for i := 0; i < len(members); i++ {
-		fmt.Println("Name: ", members[i].Name)
-		fmt.Println("Age: ", members[i].Age)
-		fmt.Println()
+	fmt.Println("************")
+	for i := 0; i < 5; i++ {
+		PrintAllMembers(members, i)
 	}
 
 	enrolment := make(map[*Member]*Book)
@@ -180,23 +152,63 @@ func main() {
 	books[3].IsIn = false
 	books[3].InDate = time.Now()
 
-	for i := 0; i < 5; i++ {
-		fmt.Println(enrolment[members[i]])
-		fmt.Println()
-		fmt.Println(books[i])
-		fmt.Println(members[i])
-	}
+	members[0].Book = books[0].Name
+	members[2].Book = books[1].Name
+	members[4].Book = books[3].Name
 
 	fmt.Println("-------------------------------------------------------------------------------------------")
+	fmt.Println("LIBRARY")
+	fmt.Println()
+	fmt.Println("Inside Library")
+	fmt.Println("************")
+	fmt.Println()
+	for i := 0; i < 5; i++ {
+		if books[i].IsIn {
+			in[i] = books[i]
+		}
+		if in[i] != nil {
+			PrintAllBooks(in, i)
+		}
+	}
+
+	fmt.Println("Enrolments")
+	fmt.Println("************")
+	fmt.Println()
+	for i := 0; i < 5; i++ {
+		if members[i].Book != "" {
+			fmt.Println("->", members[i].Name, members[i].Book)
+			fmt.Println()
+		}
+
+	}
+
 	delete(enrolment, members[0])
 	books[0].IsIn = true
-	fmt.Println(enrolment[members[0]])
-	fmt.Println(books[0])
 
+	fmt.Println("---------------------------------------------------------")
+	fmt.Println("Inside Library")
+	fmt.Println("************")
+	fmt.Println()
 	for i := 0; i < 5; i++ {
-		fmt.Println(enrolment[members[i]])
-		fmt.Println(books[i])
-		fmt.Println(members[i])
+		if books[i].IsIn {
+			in[i] = books[i]
+		}
+		if in[i] != nil {
+			PrintAllBooks(in, i)
+		}
+
+	}
+	fmt.Println()
+	fmt.Println("Outside Library")
+	fmt.Println("************")
+	fmt.Println()
+	for i := 0; i < 5; i++ {
+		if !books[i].IsIn {
+			out[i] = books[i]
+		}
+		if out[i] != nil {
+			PrintAllBooks(out, i)
+		}
 	}
 
 }
